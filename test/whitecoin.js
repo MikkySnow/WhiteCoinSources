@@ -39,7 +39,14 @@ contract('Whitecoin', function(accounts) {
         assert.equal(await whitecoin.balanceOf(address), amount);
     })
 
-    it('Should be rejected while non-minter adds minter', async function() {
+    it('Should be rejected while non-manager adds minter', async function() {
         whitecoin.addMinter(accounts[2], {from: accounts[2]}).should.be.rejectedWith(EVMThrow);
+    })
+
+    it('Frozen accounts can\'t transfer tokens', async function() {
+        await whitecoin.addMinter(manager);
+        await whitecoin.transfer(accounts[1], 10000000);
+        await whitecoin.freezeAccount(accounts[1]);
+        await whitecoin.transfer(accounts[1], 10000000, {from: accounts[1]}).should.be.rejectedWith(EVMThrow);
     })
 });
